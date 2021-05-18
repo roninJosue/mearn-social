@@ -1,1 +1,1 @@
-# mearn-social
+# mern-social
