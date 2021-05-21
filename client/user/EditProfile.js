@@ -62,6 +62,7 @@ export default function EditProfile({ match }) {
     error: '',
     id: ''
   })
+
   const jwt = auth.isAuthenticated()
 
   useEffect(() => {
@@ -90,6 +91,7 @@ export default function EditProfile({ match }) {
     values.passoword && userData.append('passoword', values.passoword)
     values.about && userData.append('about', values.about)
     values.photo && userData.append('photo', values.photo)
+    
     update({
       userId: match.params.userId
     }, {

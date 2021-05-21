@@ -3,6 +3,7 @@ import extend from "lodash/extend";
 import formidable from "formidable";
 import fs from "fs";
 import errorHandler from "./../helpers/dbErrorHandler";
+import profileImage from './../../client/assets/images/profile-pic.png'
 
 const create = async (req, res, next) => {
   const user = new User(req.body);
@@ -62,7 +63,7 @@ const update = async (req, res) => {
       });
     }
     let user = req.profile;
-    user = extend(user, req.body);
+    user = extend(user, fields);
     user.updated = Date.now();
     if (files.photo) {
       user.photo.data = fs.readFileSync(files.photo.path);
@@ -95,4 +96,25 @@ const remove = async (req, res, next) => {
   }
 };
 
-export default { create, list, userById, read, update, remove };
+const photo = (req, res, next) => {
+  if(req.profile.photo.data){
+    res.set("Content-Type", req.profile.photo.contentType)
+    return res.send(req.profile.photo.data)
+  }
+  next()
+}
+
+const defaultPhoto = (req, res) => {
+  return res.sendFile(process.cwd() + profileImage)
+}
+
+export default { 
+  create, 
+  list, 
+  userById, 
+  read, 
+  update, 
+  remove, 
+  photo,
+  defaultPhoto,
+}

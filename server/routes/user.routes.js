@@ -16,6 +16,11 @@ router.route('/api/users/:userId')
     .delete(authController.requireSignin,
         authController.hasAuthorization,
         usrController.remove)
+    
+router.route('/api/users/photo/:userId')
+    .get(usrController.photo, usrController.defaultPhoto)
+router.route('/api/users/defaultPhoto')
+    .get(usrController.defaultPhoto)
 
 router.param('userId', usrController.userById)
 
