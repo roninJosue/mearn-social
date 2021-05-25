@@ -3,7 +3,7 @@ import extend from "lodash/extend";
 import formidable from "formidable";
 import fs from "fs";
 import errorHandler from "./../helpers/dbErrorHandler";
-import profileImage from './../../client/assets/images/profile-pic.png'
+import profileImage from "./../../client/assets/images/profile-pic.png";
 
 const create = async (req, res, next) => {
   const user = new User(req.body);
@@ -32,7 +32,10 @@ const list = async (req, res) => {
 
 const userById = async (req, res, next, id) => {
   try {
-    let user = await User.findById(id);
+    let user = await User.findById(id)
+      .populate("following", "_id name")
+      .populate("followers", "_id name")
+      .exec();
     if (!user) {
       return res.status(400).json({
         error: "User not found!",
@@ -97,24 +100,124 @@ const remove = async (req, res, next) => {
 };
 
 const photo = (req, res, next) => {
-  if(req.profile.photo.data){
-    res.set("Content-Type", req.profile.photo.contentType)
-    return res.send(req.profile.photo.data)
+  if (req.profile.photo.data) {
+    res.set("Content-Type", req.profile.photo.contentType);
+    return res.send(req.profile.photo.data);
   }
-  next()
-}
+  next();
+};
 
 const defaultPhoto = (req, res) => {
-  return res.sendFile(process.cwd() + profileImage)
+  return res.sendFile(process.cwd() + profileImage);
+};
+
+/*const addFollowing = async (req, res, next) => {
+  try {
+    await User.findByIdAndUpdate(req.body.userId, 
+      {$push: { following: req.body.followId },
+    })
+
+    next()
+  } catch (err) {
+    return res.status(400).json({
+      error: err,
+    });
+  }
+};
+
+const addFollower = async (req, res) => {
+  try {
+    let result = await User.findByIdAndUpdate(
+      req.body.followId,
+      { $push: { followers: req.body.userId } },
+      { new: true }
+    ).populate("following", "_id name")
+    .populate("followers", "_id name")
+    .exec();
+
+    result.hashed_password = undefined;
+    result.salt = undefined;
+    res.json(result);
+  } catch (err) {
+    return res.status(400).json({
+      error: err,
+    });
+  }
+};*/
+
+const addFollowing = async (req, res, next) => {
+  try{
+    await User.findByIdAndUpdate(req.body.userId, {$push: {following: req.body.followId}}) 
+    next()
+  }catch(err){
+    return res.status(400).json({
+      error: errorHandler.getErrorMessage(err)
+    })
+  }
 }
 
-export default { 
-  create, 
-  list, 
-  userById, 
-  read, 
-  update, 
-  remove, 
+const addFollower = async (req, res) => {
+  try{
+    let result = await User.findByIdAndUpdate(req.body.followId, {$push: {followers: req.body.userId}}, {new: true})
+                            .populate('following', '_id name')
+                            .populate('followers', '_id name')
+                            .exec()
+      result.hashed_password = undefined
+      result.salt = undefined
+      res.json(result)
+      res.json(req.body.followId)
+    }catch(err) {
+      return res.status(400).json({
+        error: errorHandler.getErrorMessage(err)
+      })
+    }  
+}
+
+const removeFollowing = async (req, res, next) => {
+  try {
+    await User.findByIdAndUpdate(req.body.userId, {
+      $pull: { following: req.body.unfollowId },
+    });
+    next();
+  } catch (err) {
+    return res.status(400).json({
+      error: errorHandler.getErrorMessage(err),
+    });
+  }
+};
+
+const removeFollower = async (req, res) => {
+  try {
+    let result = await User.findByIdAndUpdate(
+      req.body.unfollowId,
+      { $pull: { followers: req.body.userId } },
+      { new: true }
+    )
+      .populate("following", "_id name")
+      .populate("followers", "_id name")
+      .exec();
+
+    result.hashed_password = undefined;
+    result.salt = undefined;
+    res.json(result);
+  } catch (err) {
+    return res.status(400).json({
+      error: errorHandler.getErrorMessage(err),
+    });
+  }
+};
+
+export default {
+  create,
+  list,
+  userById,
+  read,
+  update,
+  remove,
   photo,
   defaultPhoto,
-}
+  addFollowing,
+  addFollower,
+  removeFollowing,
+  removeFollower,
+};
