@@ -19,6 +19,8 @@ import { Edit, Person } from "@material-ui/icons";
 import DeleteUser from './DeleteUser'
 import { Link } from "react-router-dom";
 import FollowProfileButton from "./FollowProfileButton";
+import FollowGrid from "./FollowGrid";
+import FindPeople from "./FindPeople";
 
 const useStyles = makeStyles(theme=>({
   root: theme.mixins.gutters({
@@ -133,6 +135,9 @@ export default function Profile({ match }) {
             secondary={`Joined: ${new Date(values.user.created).toDateString()}`}
           />
         </ListItem>
+        <FollowGrid people={values.user.following}/>
+        <FollowGrid people={values.user.followers}/>
+        <FindPeople />
       </List>
     </Paper>
   );

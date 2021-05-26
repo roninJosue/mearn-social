@@ -1,6 +1,7 @@
 import express from "express"
 import usrController from "./../controllers/user.controller"
 import authController from './../controllers/auth.controller'
+import userController from "./../controllers/user.controller"
 
 const router = express.Router()
 
@@ -13,11 +14,6 @@ router.route('/api/users/photo/:userId')
 router.route('/api/users/defaultPhoto')
     .get(usrController.defaultPhoto)
 
-/*router.route('/api/users/follow')
-    .put(authController.requireSignin, 
-        usrController.addFollowing, 
-        usrController.addFollower)*/
-
 router.route('/api/users/follow')
     .put(authController.requireSignin, 
         usrController.addFollowing, 
@@ -27,6 +23,10 @@ router.route('/api/users/unfollow')
     .put(authController.requireSignin, 
         usrController.removeFollowing,
         usrController.removeFollower)
+
+router.route('/api/users/findpeople/:userId')
+    .get(authController.requireSignin, 
+        userController.findPeople)
 
 router.route('/api/users/:userId')
     .get(authController.requireSignin, usrController.read)
