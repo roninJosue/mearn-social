@@ -83,7 +83,7 @@ export default function FindPeople() {
                 console.log(data.error)
             }else{
                 let toFollow = values.users
-                toFollow.splie(index, 1)
+                toFollow.splice(index, 1)
                 setValues({...values, users: toFollow, open: true, followMessage: `Following ${user.name}`})
             }
         })
