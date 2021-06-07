@@ -21,6 +21,8 @@ import { Link } from "react-router-dom";
 import FollowProfileButton from "./FollowProfileButton";
 import FollowGrid from "./FollowGrid";
 import FindPeople from "./FindPeople";
+import ProfileTabs from './ProfileTabs'
+import { listByUser } from "../post/api-post";
 
 const useStyles = makeStyles(theme=>({
   root: theme.mixins.gutters({
@@ -48,6 +50,8 @@ export default function Profile({ match }) {
     following: false
   })
 
+  const [posts, setPosts] = useState([])
+
   const jwt = auth.isAuthenticated();
   
 
@@ -67,6 +71,7 @@ export default function Profile({ match }) {
       } else {
         let following = checkFollow(data)
         setValues({...values, user: data, following: following})
+        loadPosts(data._id)
       }
     });
 
@@ -95,6 +100,27 @@ export default function Profile({ match }) {
         setValues({...values, user: data, following: !values.following})
       }
     })
+  }
+
+  const loadPosts = (user) => {
+    listByUser({
+      userId: user
+    }, {
+      t: jwt.token
+    }).then((data) => {
+      if(data.error){
+        console.log(data.error)
+      }else{
+        setPosts(data)
+      }
+    })
+  }
+
+  const removePost = (post) => {
+    const updatedPosts = posts
+    const index = updatedPosts.indexOf(post)
+    updatedPosts.splice(index, 1)
+    setPosts(updatedPosts)
   }
 
   const photoUrl = values.user._id 
@@ -135,10 +161,8 @@ export default function Profile({ match }) {
             secondary={`Joined: ${new Date(values.user.created).toDateString()}`}
           />
         </ListItem>
-        <FollowGrid people={values.user.following}/>
-        <FollowGrid people={values.user.followers}/>
-        <FindPeople />
-      </List>
+      </List>    
+      <ProfileTabs user={values.user} posts={posts} removePostUpdate={removePost} />    
     </Paper>
   );
 }
